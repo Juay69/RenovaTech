@@ -1,0 +1,163 @@
+use ReNovaTech;
+
+// 1. COLECCIÓN: Participantes
+db.createCollection("Participantes", {
+    "validator": {
+        "$jsonSchema": {
+            "bsonType": "object",
+            "required": ["dni", "nombres", "correo", "contrasenia", "tipo", "estado"],
+            "properties": {
+                "_id": { "bsonType": "objectId" },
+                "dni": { "bsonType": "string" },
+                "nombres": { "bsonType": "string" },
+                "razon_social": { "bsonType": "string" },
+                "tipo": { "bsonType": "string" },
+                "correo": { "bsonType": "string" },
+                "contrasenia": { "bsonType": "string" },
+                "fecha_registro": { "bsonType": "date" },
+                "estado": { "bsonType": "string" },
+                "telefonos": { "bsonType": "array", "items": { "bsonType": "string" } },
+                "direcciones": { "bsonType": "array", "items": { "bsonType": "string" } }
+            },
+            "additionalProperties": false
+        }
+    }
+});
+
+// 2. COLECCIÓN: Proyectos
+db.createCollection("Proyectos", {
+    "validator": {
+        "$jsonSchema": {
+            "bsonType": "object",
+            "required": ["nombre", "fechaInicio", "estado"],
+            "properties": {
+                "_id": { "bsonType": "objectId" },
+                "nombre": { "bsonType": "string" },
+                "descripcion": { "bsonType": "string" },
+                "ubicacion": { "bsonType": "string" },
+                "fechaInicio": { "bsonType": "date" },
+                "fechaFin": { "bsonType": "date" },
+                "estado": { "bsonType": "string" },
+                "nivelImpacto": { "bsonType": "string" },
+                "categorias": { 
+                    "bsonType": "array", 
+                    "items": { "bsonType": "string" } 
+                },
+                "participantes": {
+                    "bsonType": "array",
+                    "items": {
+                        "bsonType": "object",
+                        "properties": {
+                            "participanteID": { "bsonType": "objectId" },
+                            "rol": { "bsonType": "string" }
+                        },
+                        "additionalProperties": false
+                    }
+                },
+                "actividades": {
+                    "bsonType": "array",
+                    "items": {
+                        "bsonType": "object",
+                        "properties": {
+                            "actividadID": { "bsonType": "objectId" },
+                            "nombre": { "bsonType": "string" },
+                            "descripcion": { "bsonType": "string" },
+                            "fechaInicio": { "bsonType": "date" },
+                            "fechaFin": { "bsonType": "date" },
+                            "estado": { "bsonType": "string" },
+                            "responsables": { 
+                                "bsonType": "array", 
+                                "items": { "bsonType": "objectId" } 
+                            },
+                            "recursos": {
+                                "bsonType": "array",
+                                "items": {
+                                    "bsonType": "object",
+                                    "properties": {
+                                        "nombre": { "bsonType": "string" },
+                                        "tipo": { "bsonType": "string" },
+                                        "cantidad": { "bsonType": "number" }
+                                    },
+                                    "additionalProperties": false
+                                }
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                },
+                "reportes": {
+                    "bsonType": "array",
+                    "items": {
+                        "bsonType": "object",
+                        "properties": {
+                            "reporteID": { "bsonType": "objectId" },
+                            "titulo": { "bsonType": "string" },
+                            "descripcion": { "bsonType": "string" },
+                            "fecha_generacion": { "bsonType": "date" },
+                            "tipo_reporte": { "bsonType": "string" }
+                        },
+                        "additionalProperties": false
+                    }
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+});
+
+// 3. COLECCIÓN: MetricasAmbientales
+db.createCollection("MetricasAmbientales", {
+    "validator": {
+        "$jsonSchema": {
+            "bsonType": "object",
+            "required": ["proyectoId", "tipoIndicador", "valorMeasured"],
+            "properties": {
+                "_id": { "bsonType": "objectId" },
+                "proyectoId": { "bsonType": "objectId" },
+                "tipoIndicador": { "bsonType": "string" },
+                "valorMeasured": { "bsonType": "number" },
+                "fecha_registro": { "bsonType": "date" }
+            },
+            "additionalProperties": false
+        }
+    }
+});
+
+// 4. COLECCIÓN: Aportes
+db.createCollection("Aportes", {
+    "validator": {
+        "$jsonSchema": {
+            "bsonType": "object",
+            "required": ["proyectoId", "participanteId", "monto", "estado_transaccion"],
+            "properties": {
+                "_id": { "bsonType": "objectId" },
+                "proyectoId": { "bsonType": "objectId" },
+                "participanteId": { "bsonType": "objectId" },
+                "monto": { "bsonType": "number" },
+                "fecha": { "bsonType": "date" },
+                "medio_pago": { "bsonType": "string" },
+                "estado_transaccion": { "bsonType": "string" }
+            },
+            "additionalProperties": false
+        }
+    }
+});
+
+// 5. COLECCIÓN: Comentarios
+db.createCollection("Comentarios", {
+    "validator": {
+        "$jsonSchema": {
+            "bsonType": "object",
+            "required": ["proyectoId", "participanteId", "mensaje"],
+            "properties": {
+                "_id": { "bsonType": "objectId" },
+                "proyectoId": { "bsonType": "objectId" },
+                "participanteId": { "bsonType": "objectId" },
+                "mensaje": { "bsonType": "string" },
+                "calificacion": { "bsonType": "number" },
+                "fecha": { "bsonType": "date" }
+            },
+            "additionalProperties": false
+        }
+    }
+});
