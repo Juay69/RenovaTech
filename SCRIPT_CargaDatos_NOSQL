@@ -1,0 +1,161 @@
+use ReNovaTech;
+
+// ================= 1. CARGA DE PARTICIPANTES =================
+db.Participantes.insertMany([
+  {
+    "dni": "12345678",
+    "nombres": "Juan Perez",
+    "razon_social": "Ninguna",
+    "tipo": "Ciudadano",
+    "correo": "juan@gmail.com",
+    "contrasenia": "123456",
+    "fecha_registro": new Date(),
+    "estado": "Activo",
+    "telefonos": ["987654321"],
+    "direcciones": ["Av. Los Alamos 123"]
+  },
+  {
+    "dni": "87654321",
+    "nombres": "Maria Lopez",
+    "razon_social": "Empresa Verde SAC",
+    "tipo": "Empresa",
+    "correo": "maria@gmail.com",
+    "contrasenia": "abcdef",
+    "fecha_registro": new Date(),
+    "estado": "Activo",
+    "telefonos": ["912345678"],
+    "direcciones": ["Jr. Primavera 456"]
+  },
+  {
+    "dni": "11223344",
+    "nombres": "Carlos Ruiz",
+    "razon_social": "EcoLife ONG",
+    "tipo": "Organizacion",
+    "correo": "carlos@gmail.com",
+    "contrasenia": "pass123",
+    "fecha_registro": new Date(),
+    "estado": "Activo",
+    "telefonos": ["999888777"],
+    "direcciones": ["Av. Central 789"]
+  }
+]);
+
+// ================= 2. CARGA DE PROYECTOS =================
+db.Proyectos.insertMany([
+  {
+    "nombre": "Reciclaje Urbano",
+    "descripcion": "Programa de reciclaje en zonas urbanas",
+    "ubicacion": "Lima",
+    "fechaInicio": new Date(),
+    "fechaFin": new Date(),
+    "estado": "Activo",
+    "nivelImpacto": "Alto",
+    "categorias": ["Reciclaje"],
+    "participantes": [
+      { "participanteID": ObjectId(), "rol": "Coordinador" },
+      { "participanteID": ObjectId(), "rol": "Supervisor" }
+    ],
+    "actividades": [
+      {
+        "actividadID": ObjectId(),
+        "nombre": "Recoleccion",
+        "descripcion": "Recolectar residuos reciclables",
+        "fechaInicio": new Date(),
+        "fechaFin": new Date(),
+        "estado": "En proceso",
+        "responsables": [ ObjectId(), ObjectId() ],
+        "recursos": [
+          { "nombre": "Contenedores", "tipo": "Material", "cantidad": 20 }
+        ]
+      }
+    ],
+    "reportes": [
+      {
+        "reporteID": ObjectId(),
+        "titulo": "Reporte Inicial",
+        "descripcion": "Reporte del avance del proyecto de reciclaje",
+        "fecha_generacion": new Date(),
+        "tipo_reporte": "Avance"
+      }
+    ]
+  },
+  {
+    "nombre": "Energia Solar",
+    "descripcion": "Implementacion de paneles solares",
+    "ubicacion": "Cusco",
+    "fechaInicio": new Date(),
+    "fechaFin": new Date(),
+    "estado": "Activo",
+    "nivelImpacto": "Alto",
+    "categorias": ["Energia"],
+    "participantes": [
+      { "participanteID": ObjectId(), "rol": "Asesor" }
+    ],
+    "actividades": [],
+    "reportes": [
+      {
+        "reporteID": ObjectId(),
+        "titulo": "Reporte Solar",
+        "descripcion": "Reporte de implementacion de paneles solares",
+        "fecha_generacion": new Date(),
+        "tipo_reporte": "Impacto"
+      }
+    ]
+  }
+]);
+
+// ================= 3. CARGA DE MÉTRICAS AMBIENTALES =================
+db.MetricasAmbientales.insertMany([
+  {
+    "proyectoId": ObjectId(),
+    "tipoIndicador": "CO2 Reducido",
+    "valorMeasured": 250.50,
+    "fecha_registro": new Date()
+  },
+  {
+    "proyectoId": ObjectId(),
+    "tipoIndicador": "Energia Ahorrada",
+    "valorMeasured": 500.75,
+    "fecha_registro": new Date()
+  }
+]);
+
+// ================= 4. CARGA DE APORTES FINANCIEROS =================
+db.Aportes.insertMany([
+  {
+    "proyectoId": ObjectId(),
+    "participanteId": ObjectId(),
+    "monto": 150.00,
+    "fecha": new Date(),
+    "medio_pago": "Yape",
+    "estado_transaccion": "Completado"
+  },
+  {
+    "proyectoId": ObjectId(),
+    "participanteId": ObjectId(),
+    "monto": 300.00,
+    "fecha": new Date(),
+    "medio_pago": "Transferencia",
+    "estado_transaccion": "Pendiente"
+  }
+]);
+
+// ================= 5. CARGA DE COMENTARIOS =================
+db.Comentarios.insertMany([
+  {
+    "proyectoId": ObjectId(),
+    "participanteId": ObjectId(),
+    "mensaje": "Excelente iniciativa ambiental",
+    "calificacion": 5,
+    "fecha": new Date()
+  },
+  {
+    "proyectoId": ObjectId(),
+    "participanteId": ObjectId(),
+    "mensaje": "Muy buen proyecto sostenible",
+    "calificacion": 4,
+    "fecha": new Date()
+  }
+]);
+
+print("¡Carga masiva directa ejecutada con éxito!");
