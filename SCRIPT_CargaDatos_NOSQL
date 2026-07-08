@@ -1,698 +1,211 @@
 use Empresa_Ambiental;
 
-db.createCollection("actividades", {
-    "capped": false,
-    "validator": {
-        "$jsonSchema": {
-            "bsonType": "object",
-            "title": "actividades",
-            "properties": {
-                "_id": {
-                    "bsonType": "objectId"
-                },
-                "proyecto_id": {
-                    "bsonType": "objectId"
-                },
-                "nombre": {
-                    "bsonType": "string",
-                    "maxLength": 100
-                },
-                "descripcion": {
-                    "bsonType": "string",
-                    "maxLength": 300
-                },
-                "fecha_inicio": {
-                    "bsonType": "date"
-                },
-                "fecha_fin": {
-                    "bsonType": "date"
-                },
-                "estado": {
-                    "bsonType": "string",
-                    "enum": [
-                        "Pendiente",
-                        "En proceso",
-                        "Finalizado"
-                    ]
-                },
-                "responsables": {
-                    "bsonType": "array",
-                    "description": "N:M actividad-participante (solo referencias)",
-                    "additionalItems": true,
-                    "items": {
-                        "bsonType": "object",
-                        "properties": {
-                            "participante_id": {
-                                "bsonType": "objectId"
-                            },
-                            "nombres": {
-                                "bsonType": "string"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "participante_id",
-                            "nombres"
-                        ]
-                    }
-                },
-                "recursos": {
-                    "bsonType": "array",
-                    "description": "N:M actividad-recurso (referencia a recurso compartido)",
-                    "additionalItems": true,
-                    "items": {
-                        "bsonType": "object",
-                        "properties": {
-                            "recurso_id": {
-                                "bsonType": "objectId"
-                            },
-                            "nombre": {
-                                "bsonType": "string"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "recurso_id",
-                            "nombre"
-                        ]
-                    }
-                }
-            },
-            "additionalProperties": false,
-            "required": [
-                "_id",
-                "proyecto_id",
-                "nombre",
-                "descripcion",
-                "fecha_inicio",
-                "fecha_fin",
-                "estado",
-                "responsables",
-                "recursos"
-            ]
-        }
-    },
-    "validationLevel": "off",
-    "validationAction": "warn"
-});
+// ================= 1. CARGA DE RECURSOS =================
+db.recursos.insertMany([
+  {
+    "_id": ObjectId(),
+    "nombre": "Contenedores",
+    "tipo": "Material",
+    "stock": NumberDecimal("20.00")
+  },
+  {
+    "_id": ObjectId(),
+    "nombre": "Panel Solar",
+    "tipo": "Equipo",
+    "stock": NumberDecimal("15.00")
+  }
+]);
 
-db.actividades.createIndex({
-    "_id": 1
-},
-{
-    "name": "_id_"
-});
+// ================= 2. CARGA DE CATEGORIAS =================
+db.categorias.insertMany([
+  {
+    "_id": ObjectId(),
+    "categoria": "Reciclaje"
+  },
+  {
+    "_id": ObjectId(),
+    "categoria": "Energia"
+  }
+]);
 
-db.actividades.createIndex({
-    "proyecto_id": 1
-},
-{
-    "name": "proyecto_id_1"
-});
+// ================= 3. CARGA DE PARTICIPANTES =================
+db.participantes.insertMany([
+  {
+    "_id": ObjectId(),
+    "dni": "12345678",
+    "nombres": "Juan Perez",
+    "razon_social": null, // null porque es Ciudadano según tu regla
+    "tipo": "Ciudadano",
+    "correo": "juan@gmail.com",
+    "contrasena": "clave12345",
+    "fecha_registro": new Date(),
+    "estado_cuenta": "Activo",
+    "direcciones": ["Av. Los Alamos 123"],
+    "telefonos": ["987654321"]
+  },
+  {
+    "_id": ObjectId(),
+    "dni": "87654321",
+    "nombres": "Maria Lopez",
+    "razon_social": "Empresa Verde SAC",
+    "tipo": "Empresa",
+    "correo": "maria@gmail.com",
+    "contrasena": "verde2026",
+    "fecha_registro": new Date(),
+    "estado_cuenta": "Activo",
+    "direcciones": ["Jr. Primavera 456"],
+    "telefonos": ["912345678"]
+  },
+  {
+    "_id": ObjectId(),
+    "dni": "11223344",
+    "nombres": "Carlos Ruiz",
+    "razon_social": "EcoLife ONG",
+    "tipo": "Organizacion",
+    "correo": "carlos@gmail.com",
+    "contrasena": "ecolife01",
+    "fecha_registro": new Date(),
+    "estado_cuenta": "Activo",
+    "direcciones": ["Av. Central 789"],
+    "telefonos": ["999888777"]
+  }
+]);
 
+// ================= 4. CARGA DE PROYECTOS =================
+db.proyectos.insertMany([
+  {
+    "_id": ObjectId(),
+    "nombre": "Reciclaje Urbano",
+    "descripcion": "Programa de reciclaje en zonas urbanas",
+    "tipo": "Reciclaje",
+    "nivel_impacto": "Alto",
+    "ubicacion": "Lima",
+    "fecha_inicio": new Date(),
+    "fecha_fin": new Date(),
+    "estado": "En proceso",
+    "categorias": [
+      { "categoria_id": ObjectId(), "categoria": "Reciclaje" }
+    ],
+    "equipo": [
+      { "participante_id": ObjectId(), "nombres": "Juan Perez", "rol": "Coordinador" },
+      { "participante_id": ObjectId(), "nombres": "Maria Lopez", "rol": "Supervisor" }
+    ]
+  },
+  {
+    "_id": ObjectId(),
+    "nombre": "Energia Solar",
+    "descripcion": "Implementacion de paneles solares",
+    "tipo": "Energia",
+    "nivel_impacto": "Alto",
+    "ubicacion": "Cusco",
+    "fecha_inicio": new Date(),
+    "fecha_fin": new Date(),
+    "estado": "En proceso",
+    "categorias": [
+      { "categoria_id": ObjectId(), "categoria": "Energia" }
+    ],
+    "equipo": [
+      { "participante_id": ObjectId(), "nombres": "Carlos Ruiz", "rol": "Asesor" }
+    ]
+  }
+]);
 
+// ================= 5. CARGA DE ACTIVIDADES =================
+db.actividades.insertMany([
+  {
+    "_id": ObjectId(),
+    "proyecto_id": ObjectId(),
+    "nombre": "Recoleccion",
+    "descripcion": "Recolectar residuos reciclables",
+    "fecha_inicio": new Date(),
+    "fecha_fin": new Date(),
+    "estado": "En proceso",
+    "responsables": [
+      { "participante_id": ObjectId(), "nombres": "Juan Perez" },
+      { "participante_id": ObjectId(), "nombres": "Maria Lopez" }
+    ],
+    "recursos": [
+      { "recurso_id": ObjectId(), "nombre": "Contenedores" }
+    ]
+  }
+]);
 
+// ================= 6. CARGA DE APORTES =================
+db.aportes.insertMany([
+  {
+    "_id": ObjectId(),
+    "proyecto_id": ObjectId(),
+    "participante_id": ObjectId(),
+    "monto": NumberDecimal("150.00"), // Decimal128 requerido por tu esquema
+    "fecha": new Date(),
+    "medio_pago": "Yape",
+    "estado_transaccion": "Completado"
+  },
+  {
+    "_id": ObjectId(),
+    "proyecto_id": ObjectId(),
+    "participante_id": ObjectId(),
+    "monto": NumberDecimal("300.00"),
+    "fecha": new Date(),
+    "medio_pago": "Transferencia",
+    "estado_transaccion": "Pendiente"
+  }
+]);
 
-db.createCollection("aportes", {
-    "capped": false,
-    "validator": {
-        "$jsonSchema": {
-            "bsonType": "object",
-            "title": "aportes",
-            "properties": {
-                "_id": {
-                    "bsonType": "objectId"
-                },
-                "proyecto_id": {
-                    "bsonType": "objectId"
-                },
-                "participante_id": {
-                    "bsonType": "objectId"
-                },
-                "monto": {
-                    "bsonType": "decimal",
-                    "description": "Decimal128 para dinero"
-                },
-                "fecha": {
-                    "bsonType": "date"
-                },
-                "medio_pago": {
-                    "bsonType": "string",
-                    "enum": [
-                        "Yape",
-                        "Plin",
-                        "Transferencia",
-                        "Efectivo",
-                        "Tarjeta"
-                    ]
-                },
-                "estado_transaccion": {
-                    "bsonType": "string",
-                    "enum": [
-                        "Pendiente",
-                        "Completado",
-                        "Fallido",
-                        "Cancelado"
-                    ]
-                }
-            },
-            "additionalProperties": false,
-            "required": [
-                "_id",
-                "proyecto_id",
-                "participante_id",
-                "monto",
-                "fecha",
-                "medio_pago",
-                "estado_transaccion"
-            ]
-        }
-    },
-    "validationLevel": "off",
-    "validationAction": "warn"
-});
+// ================= 7. CARGA DE COMENTARIOS =================
+db.comentarios.insertMany([
+  {
+    "_id": ObjectId(),
+    "proyecto_id": ObjectId(),
+    "participante_id": ObjectId(),
+    "mensaje": "Excelente iniciativa ambiental",
+    "fecha": new Date(),
+    "calificacion": 5
+  },
+  {
+    "_id": ObjectId(),
+    "proyecto_id": ObjectId(),
+    "participante_id": ObjectId(),
+    "mensaje": "Muy buen proyecto sostenible",
+    "fecha": new Date(),
+    "calificacion": 4
+  }
+]);
 
-db.aportes.createIndex({
-    "_id": 1
-},
-{
-    "name": "_id_"
-});
+// ================= 8. CARGA DE METRICAS AMBIENTALES =================
+db.metricas_ambientales.insertMany([
+  {
+    "_id": ObjectId(),
+    "proyecto_id": ObjectId(),
+    "tipo_indicador": "CO2 Reducido",
+    "valor_medido": NumberDecimal("250.50"),
+    "fecha_registro": new Date()
+  },
+  {
+    "_id": ObjectId(),
+    "proyecto_id": ObjectId(),
+    "tipo_indicador": "Energia Ahorrada",
+    "valor_medido": NumberDecimal("500.75"),
+    "fecha_registro": new Date()
+  }
+]);
 
-db.aportes.createIndex({
-    "proyecto_id": 1
-},
-{
-    "name": "proyecto_id_1"
-});
-
-db.aportes.createIndex({
-    "participante_id": 1
-},
-{
-    "name": "participante_id_1"
-});
-
-
-
-
-db.createCollection("categorias", {
-    "capped": false,
-    "validator": {
-        "$jsonSchema": {
-            "bsonType": "object",
-            "title": "categorias",
-            "properties": {
-                "_id": {
-                    "bsonType": "objectId"
-                },
-                "categoria": {
-                    "bsonType": "string",
-                    "maxLength": 40
-                }
-            },
-            "additionalProperties": false,
-            "required": [
-                "_id",
-                "categoria"
-            ]
-        }
-    },
-    "validationLevel": "off",
-    "validationAction": "warn"
-});
-
-db.categorias.createIndex({
-    "_id": 1
-},
-{
-    "name": "_id_"
-});
-
-
-
-
-db.createCollection("comentarios", {
-    "capped": false,
-    "validator": {
-        "$jsonSchema": {
-            "bsonType": "object",
-            "title": "comentarios",
-            "properties": {
-                "_id": {
-                    "bsonType": "objectId"
-                },
-                "proyecto_id": {
-                    "bsonType": "objectId"
-                },
-                "participante_id": {
-                    "bsonType": "objectId"
-                },
-                "mensaje": {
-                    "bsonType": "string",
-                    "maxLength": 300
-                },
-                "fecha": {
-                    "bsonType": "date"
-                },
-                "calificacion": {
-                    "bsonType": "int",
-                    "maximum": 5,
-                    "minimum": 1
-                }
-            },
-            "additionalProperties": false,
-            "required": [
-                "_id",
-                "proyecto_id",
-                "participante_id",
-                "mensaje",
-                "fecha",
-                "calificacion"
-            ]
-        }
-    },
-    "validationLevel": "off",
-    "validationAction": "warn"
-});
-
-db.comentarios.createIndex({
-    "_id": 1
-},
-{
-    "name": "_id_"
-});
-
-db.comentarios.createIndex({
-    "proyecto_id": 1
-},
-{
-    "name": "proyecto_id_1"
-});
-
-
-
-
-db.createCollection("metricas_ambientales", {
-    "capped": false,
-    "validator": {
-        "$jsonSchema": {
-            "bsonType": "object",
-            "title": "metricas_ambientales",
-            "properties": {
-                "_id": {
-                    "bsonType": "objectId"
-                },
-                "proyecto_id": {
-                    "bsonType": "objectId"
-                },
-                "tipo_indicador": {
-                    "bsonType": "string",
-                    "maxLength": 50
-                },
-                "valor_medido": {
-                    "bsonType": "decimal"
-                },
-                "fecha_registro": {
-                    "bsonType": "date"
-                }
-            },
-            "additionalProperties": false,
-            "required": [
-                "_id",
-                "proyecto_id",
-                "tipo_indicador",
-                "valor_medido",
-                "fecha_registro"
-            ]
-        }
-    },
-    "validationLevel": "off",
-    "validationAction": "warn"
-});
-
-db.metricas_ambientales.createIndex({
-    "_id": 1
-},
-{
-    "name": "_id_"
-});
-
-db.metricas_ambientales.createIndex({
-    "proyecto_id": 1,
-    "fecha_registro": -1
-},
-{
-    "name": "proyecto_id_1_fecha_registro_-1"
-});
-
-
-
-
-db.createCollection("participantes", {
-    "capped": false,
-    "validator": {
-        "$jsonSchema": {
-            "bsonType": "object",
-            "title": "participantes",
-            "properties": {
-                "_id": {
-                    "bsonType": "objectId"
-                },
-                "dni": {
-                    "bsonType": "string",
-                    "description": "Exactamente 8 dígitos",
-                    "maxLength": 8,
-                    "minLength": 8,
-                    "pattern": "^[0-9]{8}$"
-                },
-                "nombres": {
-                    "bsonType": "string",
-                    "maxLength": 100
-                },
-                "razon_social": {
-                    "bsonType": [
-                        "string",
-                        "null"
-                    ],
-                    "description": "null si es Ciudadano",
-                    "maxLength": 200
-                },
-                "tipo": {
-                    "bsonType": "string",
-                    "enum": [
-                        "Ciudadano",
-                        "Empresa",
-                        "Organizacion"
-                    ]
-                },
-                "correo": {
-                    "bsonType": "string"
-                },
-                "contrasena": {
-                    "bsonType": "string",
-                    "minLength": 8
-                },
-                "fecha_registro": {
-                    "bsonType": "date"
-                },
-                "estado_cuenta": {
-                    "bsonType": "string",
-                    "enum": [
-                        "Activo",
-                        "Inactivo",
-                        "Suspendido"
-                    ]
-                },
-                "direcciones": {
-                    "bsonType": "array",
-                    "additionalItems": true,
-                    "items": {
-                        "bsonType": "string",
-                        "maxLength": 150
-                    }
-                },
-                "telefonos": {
-                    "bsonType": "array",
-                    "additionalItems": true,
-                    "items": {
-                        "bsonType": "string",
-                        "maxLength": 9,
-                        "minLength": 9,
-                        "pattern": "^9[0-9]{8}$"
-                    }
-                }
-            },
-            "additionalProperties": false,
-            "required": [
-                "_id",
-                "dni",
-                "nombres",
-                "tipo",
-                "correo",
-                "contrasena",
-                "fecha_registro",
-                "estado_cuenta",
-                "direcciones",
-                "telefonos"
-            ]
-        }
-    },
-    "validationLevel": "off",
-    "validationAction": "warn"
-});
-
-db.participantes.createIndex({
-    "_id": 1
-},
-{
-    "name": "_id_"
-});
-
-db.participantes.createIndex({
-    "dni": 1
-},
-{
-    "name": "dni_1",
-    "unique": true
-});
-
-db.participantes.createIndex({
-    "correo": 1
-},
-{
-    "name": "correo_1",
-    "unique": true
-});
-
-
-
-
-db.createCollection("proyectos", {
-    "capped": false,
-    "validator": {
-        "$jsonSchema": {
-            "bsonType": "object",
-            "title": "proyectos",
-            "properties": {
-                "_id": {
-                    "bsonType": "objectId"
-                },
-                "nombre": {
-                    "bsonType": "string",
-                    "maxLength": 100
-                },
-                "descripcion": {
-                    "bsonType": "string",
-                    "maxLength": 300
-                },
-                "tipo": {
-                    "bsonType": "string",
-                    "maxLength": 30
-                },
-                "nivel_impacto": {
-                    "bsonType": "string",
-                    "enum": [
-                        "Bajo",
-                        "Medio",
-                        "Alto"
-                    ]
-                },
-                "ubicacion": {
-                    "bsonType": "string",
-                    "maxLength": 150
-                },
-                "fecha_inicio": {
-                    "bsonType": "date"
-                },
-                "fecha_fin": {
-                    "bsonType": "date"
-                },
-                "estado": {
-                    "bsonType": "string",
-                    "enum": [
-                        "Planeado",
-                        "En proceso",
-                        "Finalizado",
-                        "Cancelado"
-                    ]
-                },
-                "categorias": {
-                    "bsonType": "array",
-                    "additionalItems": true,
-                    "items": {
-                        "bsonType": "object",
-                        "properties": {
-                            "categoria_id": {
-                                "bsonType": "objectId"
-                            },
-                            "categoria": {
-                                "bsonType": "string"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "categoria_id",
-                            "categoria"
-                        ]
-                    }
-                },
-                "equipo": {
-                    "bsonType": "array",
-                    "additionalItems": true,
-                    "items": {
-                        "bsonType": "object",
-                        "properties": {
-                            "participante_id": {
-                                "bsonType": "objectId"
-                            },
-                            "nombres": {
-                                "bsonType": "string"
-                            },
-                            "rol": {
-                                "bsonType": "string",
-                                "maxLength": 30
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "participante_id",
-                            "nombres",
-                            "rol"
-                        ]
-                    }
-                }
-            },
-            "additionalProperties": false,
-            "required": [
-                "_id",
-                "nombre",
-                "descripcion",
-                "tipo",
-                "nivel_impacto",
-                "ubicacion",
-                "fecha_inicio",
-                "fecha_fin",
-                "estado",
-                "categorias",
-                "equipo"
-            ]
-        }
-    },
-    "validationLevel": "off",
-    "validationAction": "warn"
-});
-
-db.proyectos.createIndex({
-    "_id": 1
-},
-{
-    "name": "_id_"
-});
-
-
-
-
-db.createCollection("recursos", {
-    "capped": false,
-    "validator": {
-        "$jsonSchema": {
-            "bsonType": "object",
-            "title": "recursos",
-            "properties": {
-                "_id": {
-                    "bsonType": "objectId"
-                },
-                "nombre": {
-                    "bsonType": "string",
-                    "maxLength": 100
-                },
-                "tipo": {
-                    "bsonType": "string",
-                    "maxLength": 30
-                },
-                "stock": {
-                    "bsonType": "decimal",
-                    "minimum": 0
-                }
-            },
-            "additionalProperties": false,
-            "required": [
-                "_id",
-                "nombre",
-                "tipo",
-                "stock"
-            ]
-        }
-    },
-    "validationLevel": "off",
-    "validationAction": "warn"
-});
-
-db.recursos.createIndex({
-    "_id": 1
-},
-{
-    "name": "_id_"
-});
-
-
-
-
-db.createCollection("reportes", {
-    "capped": false,
-    "validator": {
-        "$jsonSchema": {
-            "bsonType": "object",
-            "title": "reportes",
-            "properties": {
-                "_id": {
-                    "bsonType": "objectId"
-                },
-                "proyecto_id": {
-                    "bsonType": "objectId"
-                },
-                "titulo": {
-                    "bsonType": "string",
-                    "maxLength": 100
-                },
-                "descripcion": {
-                    "bsonType": "string",
-                    "maxLength": 300
-                },
-                "fecha_generacion": {
-                    "bsonType": "date"
-                },
-                "tipo_reporte": {
-                    "bsonType": "string",
-                    "maxLength": 50
-                }
-            },
-            "additionalProperties": false,
-            "required": [
-                "_id",
-                "proyecto_id",
-                "titulo",
-                "descripcion",
-                "fecha_generacion",
-                "tipo_reporte"
-            ]
-        }
-    },
-    "validationLevel": "off",
-    "validationAction": "warn"
-});
-
-db.reportes.createIndex({
-    "_id": 1
-},
-{
-    "name": "_id_"
-});
-
-db.reportes.createIndex({
-    "proyecto_id": 1
-},
-{
-    "name": "proyecto_id_1"
-});
+// ================= 9. CARGA DE REPORTES =================
+db.reportes.insertMany([
+  {
+    "_id": ObjectId(),
+    "proyecto_id": ObjectId(),
+    "titulo": "Reporte Inicial",
+    "descripcion": "Reporte del avance del proyecto de reciclaje",
+    "fecha_generacion": new Date(),
+    "tipo_reporte": "Avance"
+  },
+  {
+    "_id": ObjectId(),
+    "proyecto_id": ObjectId(),
+    "titulo": "Reporte Solar",
+    "descripcion": "Reporte de implementacion de paneles solares",
+    "fecha_generacion": new Date(),
+    "tipo_reporte": "Impacto"
+  }
+]);
